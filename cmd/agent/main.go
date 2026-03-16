@@ -8,20 +8,26 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+	"github.com/DenysSkobalo/dss-hub-backend/internal/middlewares"
 )
+
+
 
 func main() {
 	log.Println("HUB-HOME-AGN: Hello, DSSpace! Operational check started.")
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/health", middlewares.SecurityMiddlewares("HUB-HOME-AGN", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"status":"online", "service":"HUB-HOME-AGN"}`))
-	})
+	}))
 
 	srv := &http.Server{
 		Addr:    ":8081", // Порт для Telemetry
 		Handler: mux,
+		ReadTimeout: 5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout: 120 * time.Second
 	}
 
 	go func() {

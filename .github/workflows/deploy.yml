@@ -1,0 +1,63 @@
+name: Backend Deploy (Controlled Recreate)
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io
+  AGENT_IMAGE: ghcr.io/${{ github.repository_owner }}/hub-home-agn
+  API_IMAGE: ghcr.io/${{ github.repository_owner }}/hub-ana-api
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_PAT }}
+
+      - name: Build and push Agent
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./cmd/agent/Dockerfile
+          push: true
+          tags: ${{ env.AGENT_IMAGE }}:latest
+
+      - name: Build and push API
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./cmd/api/Dockerfile
+          push: true
+          tags: ${{ env.API_IMAGE }}:latest
+
+      - name: Tailscale VPN
+        uses: tailscale/github-action@v2
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+
+      - name: SSH Deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_TAILSCALE_IP }}
+          username: tenyd
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /srv/projects/dss-hub/dss-hub-backend
+            echo "${{ secrets.GH_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker compose pull
+            docker compose stop
+            docker compose up -d
+            docker image prune -f

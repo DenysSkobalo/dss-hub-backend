@@ -1,0 +1,38 @@
+services:
+  hub-home-agn:
+    image: ghcr.io/denysskobalo/hub-home-agn:latest
+    container_name: HUB-HOME-AGN
+    restart: unless-stopped
+    network_mode: "host"
+    env_file: ../.env
+    volumes:
+      - /srv/projects/dss-hub/data:/app/data
+      - /proc:/host/proc:ro
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+    logging:
+      driver: "json-file"
+      options: 
+        max-size: "10m"
+        max-file: "3"
+
+  hub-ana-api:
+    image: ghcr.io/denysskobalo/hub-ana-api:latest
+    container_name: HUB-ANA-API
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:8080"
+    env_file: ../.env
+    volumes:
+      - /srv/projects/dss-hub/data:/app/data
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

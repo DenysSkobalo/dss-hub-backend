@@ -6,8 +6,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  AGENT_IMAGE: ghcr.io/${{ github.repository_owner }}/hub-home-agn
-  API_IMAGE: ghcr.io/${{ github.repository_owner }}/hub-ana-api
+  AGENT_IMAGE: ghcr.io/denysskobalo/hub-home-agn
+  API_IMAGE: ghcr.io/denysskobalo/hub-ana-api
 
 jobs:
   build-and-deploy:

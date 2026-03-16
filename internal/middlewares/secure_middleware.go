@@ -2,7 +2,6 @@ package middlewares
 
 import (
 	"net/http"
-	"time"
 )
 
 func SecurityMiddlewares(serviceName string, next http.HandlerFunc) http.HandlerFunc {

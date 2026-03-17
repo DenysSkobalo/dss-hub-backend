@@ -8,7 +8,7 @@ func SecurityMiddlewares(serviceName string, next http.HandlerFunc) http.Handler
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Strict CORS Policy
 		origin := r.Header.Get("Origin")
-		if origin == "http://localhost:1313" || origin == "https://denysskobalodev.space" {
+		if origin == "http://localhost:1313" || origin == "https://dss-hub-frontend.pages.dev" ||  origin == "https://denysskobalodev.space" {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 		}
 		

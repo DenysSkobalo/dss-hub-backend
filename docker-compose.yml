@@ -3,7 +3,6 @@ services:
     image: ghcr.io/denysskobalo/hub-home-agn:latest
     container_name: HUB-HOME-AGN
     restart: unless-stopped
-    network_mode: "host"
     env_file: ../.env
     volumes:
       - /srv/projects/dss-hub/data:/app/data
@@ -22,8 +21,6 @@ services:
     image: ghcr.io/denysskobalo/hub-ana-api:latest
     container_name: HUB-ANA-API
     restart: unless-stopped
-    ports:
-      - "127.0.0.1:8080:8080"
     env_file: ../.env
     volumes:
       - /srv/projects/dss-hub/data:/app/data
@@ -36,3 +33,16 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: HUB-SEC-TNL
+    restart: unless-stopped
+    command: tunnel run
+    env_file: ../.env 
+    networks:
+      - dss-hub-net
+
+networks:
+  dss-hub-net:
+    driver: bridge

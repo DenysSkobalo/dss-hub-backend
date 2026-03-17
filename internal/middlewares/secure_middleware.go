@@ -4,18 +4,26 @@ import (
 	"net/http"
 )
 
+var allowedOrigins = map[string]bool{
+	"http://localhost:1313":              true, // Local Dev
+	"https://denysskobalodev.space":      true, // Production Apex
+	"https://dss-hub-frontend.pages.dev": true, // Production Edge (Pages)
+}
+
 func SecurityMiddlewares(serviceName string, next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Strict CORS Policy
 		origin := r.Header.Get("Origin")
-		if origin == "http://localhost:1313" || origin == "https://dss-hub-frontend.pages.dev" ||  origin == "https://denysskobalodev.space" {
+		
+		if allowedOrigins[origin] {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 		}
 		
+		// Allowed Methods & Headers
 		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
-		// Preflight requests for browser
+		// Preflight requests for browser (HTTP OPTIONS)
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusNoContent)
 			return

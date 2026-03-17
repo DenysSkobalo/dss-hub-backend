@@ -1,7 +1,7 @@
 services:
   hub-home-agn:
     image: ghcr.io/denysskobalo/hub-home-agn:latest
-    container_name: HUB-HOME-AGN
+    container_name: hub-home-agn
     restart: unless-stopped
     env_file: ../.env
     volumes:
@@ -16,10 +16,14 @@ services:
       options: 
         max-size: "10m"
         max-file: "3"
+    networks: 
+      dss-hub-net:
+        aliases:
+          - hub-home-agn
 
   hub-ana-api:
     image: ghcr.io/denysskobalo/hub-ana-api:latest
-    container_name: HUB-ANA-API
+    container_name: hub-ana-api
     restart: unless-stopped
     env_file: ../.env
     volumes:
@@ -33,13 +37,19 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    networks:
+      dss-hub-net:
+        aliases:
+          - hub-ana-api
 
   cloudflared:
     image: cloudflare/cloudflared:latest
-    container_name: HUB-SEC-TNL
+    container_name: hub-sec-tnl
     restart: unless-stopped
     command: tunnel run
     env_file: ../.env 
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
     networks:
       - dss-hub-net
 
